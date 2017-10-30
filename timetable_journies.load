@@ -1,0 +1,22 @@
+LOAD CSV
+    FROM 'timetable_journies-017-10-27.csv' WITH ENCODING iso-646-us
+    INTO postgresql:///icp?timetable_journies
+       TARGET COLUMNS
+       (  day,
+          departure_time,
+          origin,
+          destination,
+          service_code,
+          service_description,
+          service_start,
+          service_end,
+          line_name,
+          operator_code,
+          journey_code
+       )
+    WITH truncate,
+         fields enclosed by '"',
+         fields escaped by backslash-quote,
+         fields terminated by ','
+
+    SET work_mem to '32 MB', maintenance_work_mem to '64 MB';
