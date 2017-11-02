@@ -32,8 +32,12 @@ def process(filename):
     service_description = service.find('n:Description', ns).text
     line_name = service.find('n:Lines/n:Line/n:LineName', ns).text
     service_start = service.find('n:OperatingPeriod/n:StartDate', ns).text
-    service_end = service.find('n:OperatingPeriod/n:EndDate', ns).text
-    service_op_element = service.find('n:ServiceCode', ns)
+    service_end_element = service.find('n:OperatingPeriod/n:EndDate', ns)
+    if service_end_element:
+      service_end = service_end_element.text
+    else:
+      service_end = ''
+    service_op_element = service.find('n:OperatingProfile', ns)
     service_op = txc_helper.OperatingProfile.from_et(service_op_element)
 
     operator = tree.find('n:Operators/n:Operator', ns)
@@ -48,6 +52,7 @@ def process(filename):
       journey_op_element = journey.find('n:OperatingProfile', ns)
       journey_op = txc_helper.OperatingProfile.from_et(journey_op_element)
       journey_op.defaults_from(service_op)
+
 
       # Find corresponding JoureyPattern and JourneyPatternSection
       journey_pattern_section_ref = tree.find("n:Services/n:Service/n:StandardService/n:JourneyPattern[@id='%s']/n:JourneyPatternSectionRefs" % journey_pattern_ref, ns).text

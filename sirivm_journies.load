@@ -1,18 +1,15 @@
 LOAD CSV
     FROM stdin WITH ENCODING utf8
-    INTO postgresql:///icp?timetable_journies
+    INTO postgresql:///icp?sirivm_journies
        TARGET COLUMNS
+
        (  day,
           departure_time,
           origin,
           destination,
-          service_code,
-          service_description,
-          service_start,
-          service_end,
           line_name,
           operator_code,
-          journey_code
+          vehicle_ref
        )
     WITH truncate,
          fields enclosed by '"',

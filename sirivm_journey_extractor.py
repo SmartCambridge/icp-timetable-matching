@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+'''
+Given one or more directories containing SIRI-VM data in Json, spit out
+all unique vehicle journies (based on Origin, Destination, and
+departure time) in CSV
+'''
+
 import json
 import sys
 import os
@@ -36,6 +42,7 @@ import csv
         },
 '''
 
+keys = []
 results = []
 
 csvwriter = csv.writer(sys.stdout)
@@ -54,11 +61,20 @@ for directory in sys.argv[1:]:
 
         for record in data["request_data"]:
 
-            time = record["OriginAimedDepartureTime"][11:19]
-            journey = [ record["OriginRef"], record["DestinationRef"], time ]
+           time = record["OriginAimedDepartureTime"][11:19]
+           key = [ record["OriginRef"], record["DestinationRef"], time ]
 
-            if not journey in results:
-                results.append(journey)
+           if not key in keys:
+               keys.append(key)
+               results.append(record)
 
 for result in results:
-    print(csvwriter.writerow(result))
+    csvwriter.writerow((
+        result['OriginAimedDepartureTime'][0:10],
+        result['OriginAimedDepartureTime'][11:19],
+        result['OriginRef'],
+        result['DestinationRef'],
+        result['LineRef'],
+        result['OperatorRef'],
+        result['VehicleRef']
+        ))
