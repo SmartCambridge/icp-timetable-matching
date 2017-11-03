@@ -1,8 +1,10 @@
 LOAD CSV
     FROM stdin WITH ENCODING utf8
-    INTO postgresql:///icp?timetable_journies
+    INTO postgresql:///icp?timetable_journeys
        TARGET COLUMNS
-       (  day,
+       (  region,
+          file,
+          day,
           departure_time,
           origin,
           destination,
@@ -15,6 +17,7 @@ LOAD CSV
           journey_code
        )
     WITH truncate,
+         drop indexes,
          fields enclosed by '"',
          fields escaped by backslash-quote,
          fields terminated by ','

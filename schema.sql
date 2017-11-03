@@ -1,7 +1,9 @@
 -- Schema for the timetable_journies table
 
 
-CREATE TABLE IF NOT EXISTS timetable_journies (
+CREATE TABLE IF NOT EXISTS timetable_journeys (
+    region              text,
+    file                text,
     day                 text,
     departure_time      text,
     origin              text,
@@ -15,7 +17,7 @@ CREATE TABLE IF NOT EXISTS timetable_journies (
     journey_code        text
     );
 
-CREATE TABLE IF NOT EXISTS sirivm_journies (
+CREATE TABLE IF NOT EXISTS sirivm_journeys (
     day                 text,
     departure_time      text,
     origin              text,

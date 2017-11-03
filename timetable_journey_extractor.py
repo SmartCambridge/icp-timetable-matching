@@ -18,25 +18,34 @@ ns = {'n': 'http://www.transxchange.org.uk/'}
 
 csv_writer = csv.writer(sys.stdout)
 
-def process(filename):
-    """ Process one TNDS data file """
+def process(filename, region, file):
+  """ Process one TNDS data file """
 
-    tree = ET.parse(filename).getroot()
+  tree = ET.parse(filename).getroot()
 
-    basename = os.path.splitext(os.path.basename(filename))[0]
+  basename = os.path.splitext(os.path.basename(filename))[0]
 
-    # Counting on there being only one Service, Line and Operator
-    # in each file...
-    service = tree.find('n:Services/n:Service', ns)
+  # Counting on there being only one Service, Line and Operator
+  # in each file...
+  service = tree.find('n:Services/n:Service', ns)
+
+  # Check the service start/end dates; bail out if out of range
+  service_start = service.find('n:OperatingPeriod/n:StartDate', ns).text
+  service_start_date = datetime.datetime.strptime(service_start, "%Y-%m-%d").date()
+  service_end_element = service.find('n:OperatingPeriod/n:EndDate', ns)
+  if service_end_element is not None:
+    service_end = service_end_element.text
+    service_end_date = datetime.datetime.strptime(service_end, "%Y-%m-%d").date()
+  else:
+    service_end = ''
+    service_end_date = None
+
+  if day >= service_start_date and (service_end_date is None or day <= service_end_date):
+
     service_code = service.find('n:ServiceCode', ns).text
     service_description = service.find('n:Description', ns).text
     line_name = service.find('n:Lines/n:Line/n:LineName', ns).text
-    service_start = service.find('n:OperatingPeriod/n:StartDate', ns).text
-    service_end_element = service.find('n:OperatingPeriod/n:EndDate', ns)
-    if service_end_element:
-      service_end = service_end_element.text
-    else:
-      service_end = ''
+
     service_op_element = service.find('n:OperatingProfile', ns)
     service_op = txc_helper.OperatingProfile.from_et(service_op_element)
 
@@ -46,25 +55,28 @@ def process(filename):
     # For each vehicle journey...
     for journey in tree.findall('n:VehicleJourneys/n:VehicleJourney', ns):
 
-      journey_code = journey.find('n:VehicleJourneyCode', ns).text
-      departure_time = journey.find('n:DepartureTime', ns).text
-      journey_pattern_ref = journey.find('n:JourneyPatternRef', ns).text
       journey_op_element = journey.find('n:OperatingProfile', ns)
       journey_op = txc_helper.OperatingProfile.from_et(journey_op_element)
       journey_op.defaults_from(service_op)
 
-
-      # Find corresponding JoureyPattern and JourneyPatternSection
-      journey_pattern_section_ref = tree.find("n:Services/n:Service/n:StandardService/n:JourneyPattern[@id='%s']/n:JourneyPatternSectionRefs" % journey_pattern_ref, ns).text
-      journey_pattern_section = tree.find("n:JourneyPatternSections/n:JourneyPatternSection[@id='%s']" % journey_pattern_section_ref, ns)
-
-      # Get first and last stop
-      fr = journey_pattern_section.find("n:JourneyPatternTimingLink[1]/n:From/n:StopPointRef", ns).text
-      to = journey_pattern_section.find("n:JourneyPatternTimingLink[last()]/n:To/n:StopPointRef", ns).text
-
+      # If this VehicleJourney applies...
       if journey_op.should_show(day):
+ 
+        journey_code = journey.find('n:VehicleJourneyCode', ns).text
+        departure_time = journey.find('n:DepartureTime', ns).text
+        journey_pattern_ref = journey.find('n:JourneyPatternRef', ns).text
+
+        # Find corresponding JoureyPattern and JourneyPatternSection
+        journey_pattern_section_ref = tree.find("n:Services/n:Service/n:StandardService/n:JourneyPattern[@id='%s']/n:JourneyPatternSectionRefs" % journey_pattern_ref, ns).text
+        journey_pattern_section = tree.find("n:JourneyPatternSections/n:JourneyPatternSection[@id='%s']" % journey_pattern_section_ref, ns)
+
+        # Get first and last stop
+        fr = journey_pattern_section.find("n:JourneyPatternTimingLink[1]/n:From/n:StopPointRef", ns).text
+        to = journey_pattern_section.find("n:JourneyPatternTimingLink[last()]/n:To/n:StopPointRef", ns).text
 
         csv_writer.writerow((
+          region,
+          file,
           day,
           departure_time,
           fr,
@@ -80,6 +92,10 @@ def process(filename):
 
 
 if __name__ == '__main__':
-    for filename in sys.argv[1:]:
-        print('Processing %s' % filename, file=sys.stderr)
-        process(filename)
+  directory = sys.argv[1]
+  for region in 'EA', 'EM', 'SE':
+    directory = os.path.join(sys.argv[1], region)
+    for file in os.listdir(os.fsencode(directory)):
+      filename = os.path.join(directory, os.fsdecode(file))
+      print('Processing %s' % filename, file=sys.stderr)
+      process(filename, region, os.fsdecode(file))
