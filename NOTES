@@ -1,0 +1,39 @@
+Import the timetable for a particular day (encoded in the source,
+currently 2017-10-27):
+
+'''PYTHONPATH=../operating_profile/ ./timetable_journey_extractor.py
+../TNDS_bus_data/sections/ | pgloader timetable_journeys.load'''
+
+(script currently extracts EA+EM+SE regions only)
+
+Load siri-vm.json data for 2017-10-27:
+
+'''./sirivm_journey_extractor.py
+../siri/sirivm_json/data_bin/2017/10/27/ | pgloader
+sirivm_journeys.load'''
+
+Looking at data for Friday 27 October 2017
+
+Using TNDS data for EA+EM+SE Extracted 113574 timetabled
+journeys.
+
+The timetable includes 2097 different journeys with duplicate
+departure time and origin. And 564 with duplicate departure time,
+origin and destination.
+
+Many of these look as if they may be actually duplicated journeys,
+either as part of the same Service/Line (and so TNDS file), or split
+across Service/Lines (files).
+
+6199 distinct SIRI VM journeys based on departure time, origin and
+destination.
+
+Joining SIRI journeys on Timetable journeys by departure time, 
+origin and destination gives 6202 rows, of which 5758 (93%) matched and
+444 (7%) didn't.
+
+So, 6199 journeys of which 444 didn't match leaves 5755 that did. 5758
+matched rows for 5755 journeys means we got three extra records as a
+result of duplication. In this case this was as a result of three
+records each of which were duplicated once.
+
