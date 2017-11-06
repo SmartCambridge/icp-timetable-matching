@@ -1,0 +1,181 @@
+select s.operator_code, s.line_name, t.operator_code, t.line_name, t.service_description, count(*) from sirivm_journeys as s left join timetable_journeys as t on s.departure_time = t.departure_time and s.origin = t.origin and s.destination = t.destination group by s.operator_code, s.line_name, t.operator_code, t.line_name, t.service_description order by s.operator_code, s.line_name, t.operator_code, t.line_name;
++-----------------+-------------+-----------------+----------------------------+--------------------------------------------------------------------------------------+---------+
+| operator_code   | line_name   | operator_code   | line_name                  | service_description                                                                  | count   |
+|-----------------+-------------+-----------------+----------------------------+--------------------------------------------------------------------------------------+---------|
+| ATS             | 150         | ARBB            | 150|Max                    | Aylesbury - Leighton Buzzard - Milton Keynes                                         | 22      |
+| ATS             | 70          | ARBB            | 70                         | Luton - Dunstable - Leighton Buzzard - Milton Keynes                                 | 23      |
+| ATS             | 97          | ARHE            | 97                         | Arlesey / Stotfold - Hitchin                                                         | 27      |
+| ATS             | F70         | ARBB            | F70                        | Luton - Dunstable - Leighton Buzzard - Milton Keynes                                 | 26      |
+| CBLE            | 16          | CBLL            | 16                         | Kettering - Thrapston - Raunds                                                       | 16      |
+| CBLE            | 188         | CBBH            | 188                        | Hitchin - Biggleswade - Wrestlingworth - Potton - Sandy                              | 12      |
+| CBLE            | 190         | CBBH            | 190                        | Hitchin - Biggleswade - Potton - Gamlingay - Sandy                                   | 11      |
+| CBLE            | 34          | <null>          | <null>                     | <null>                                                                               | 8       |
+| CBLE            | 35          | <null>          | <null>                     | <null>                                                                               | 2       |
+| CBLE            | 62          | CBLL            | 62                         | Northampton - Brixworth - Scaldwell                                                  | 1       |
+| CBLE            | 8           | <null>          | <null>                     | <null>                                                                               | 9       |
+| CBLE            | 85          | CBBH            | 85                         | Biggleswade Town Service - Clockwise Direction                                       | 2       |
+| CBLE            | 85          | <null>          | <null>                     | <null>                                                                               | 10      |
+| CBLE            | 85A         | <null>          | <null>                     | <null>                                                                               | 12      |
+| CBLE            | 89          | CBBH            | 89                         | Henlow Camp - Hitchin                                                                | 1       |
+| CBLE            | 89          | <null>          | <null>                     | <null>                                                                               | 3       |
+| CBLE            | 9           | CBLL            | 9                          | Peterborough - Stamford - Oakham                                                     | 7       |
+| CBLE            | 9           | <null>          | <null>                     | <null>                                                                               | 10      |
+| CBLE            | RF1         | CBLL            | RF1|Rutland Flyer          | Melton Mowbray - Oakham - Corby                                                      | 26      |
+| CBLE            | RF1         | <null>          | <null>                     | <null>                                                                               | 8       |
+| CBLE            | W8          | <null>          | <null>                     | <null>                                                                               | 8       |
+| FECS            | X1          | FECS            | X1                         | Lowestoft - Norwich - Peterborough                                                   | 52      |
+| FECS            | X1          | <null>          | <null>                     | <null>                                                                               | 108     |
+| GP              | 20          | GPLM            | 20                         | Bedford : Brickhill - Town Centre                                                    | 3       |
+| GP              | 20          | <null>          | <null>                     | <null>                                                                               | 3       |
+| GP              | 200         | GPLM            | 200                        | Biggleswade - Shefford - Clophill - Silsoe - Pulloxhill - Flitwick                   | 1       |
+| GP              | 200         | <null>          | <null>                     | <null>                                                                               | 7       |
+| GP              | 21          | GPLM            | 21                         | Bedford : Brickhill - Town Centre - Elstow Lower School                              | 11      |
+| GP              | 21          | <null>          | <null>                     | <null>                                                                               | 8       |
+| GP              | 22          | <null>          | <null>                     | <null>                                                                               | 6       |
+| GP              | 24          | <null>          | <null>                     | <null>                                                                               | 19      |
+| GP              | 25          | <null>          | <null>                     | <null>                                                                               | 19      |
+| GP              | 26          | GPLM            | 26                         | Harrold - Wymington - Rushden                                                        | 3       |
+| GP              | 26          | <null>          | <null>                     | <null>                                                                               | 6       |
+| GP              | 27          | GPLM            | 27                         | Bedford - Cople - Willington - Great Barford - Renhold - Bedford                     | 4       |
+| GP              | 28          | <null>          | <null>                     | <null>                                                                               | 11      |
+| GP              | 34          | <null>          | <null>                     | <null>                                                                               | 12      |
+| GP              | 41          | GPLM            | 41                         | Clophill - Silsoe - Barton - Luton                                                   | 1       |
+| GP              | 41          | <null>          | <null>                     | <null>                                                                               | 1       |
+| GP              | 42          | GPLM            | 42                         | Bedford - Ampthill - Flitwick - Toddington - Dunstable                               | 25      |
+| GP              | 44          | GPLM            | 44                         | Bedford - Clophill - Ampthill - Flitwick - Ampthill Heights                          | 16      |
+| GP              | 44          | <null>          | <null>                     | <null>                                                                               | 2       |
+| GP              | 74          | GPLM            | 74                         | Bedford - Cople - Biggleswade                                                        | 9       |
+| GP              | 74          | <null>          | <null>                     | <null>                                                                               | 7       |
+| GP              | CX          | GPLM            | CX                         | Luton - White Lion - Luton                                                           | 1       |
+| SCCM            | 1           | SCBD            | 1                          | Bedford : Town Centre - Kempston                                                     | 63      |
+| SCCM            | 1           | SCCM            | 1|Citi                     | Arbury - City Centre - Addenbrookes - Cherry Hinton - Fulbourn                       | 174     |
+| SCCM            | 1           | SCPB            | 1|Citi                     | Orton Wistow -Peterborough - Werrington                                              | 167     |
+| SCCM            | 10          | SCBD            | 10                         | Bedford : Town Centre - Putnoe - Woodside - Goldington                               | 51      |
+| SCCM            | 10          | SCCM            | 10                         | Cambridge - Bottisham - Burwell - Newmarket                                          | 26      |
+| SCCM            | 11          | SCBD            | 11                         | Bedford - Biddenham - Great Denham                                                   | 32      |
+| SCCM            | 11          | SCCM            | 11                         | Cambridge - Newmarket - Bury St Edmunds                                              | 23      |
+| SCCM            | 12          | SCCM            | 12                         | Cambridge - Newmarket - Soham - Ely                                                  | 23      |
+| SCCM            | 13          | SCCM            | 13                         | Cambridge - The Abingtons - Linton - Haverhill                                       | 31      |
+| SCCM            | 13A         | SCCM            | 13A                        | Haverhill - Linton - The Abingtons - Cambridge                                       | 22      |
+| SCCM            | 13B         | SCCM            | 13B                        | Haverhill - Cambridge                                                                | 1       |
+| SCCM            | 15          | SCCM            | 15                         | Ely City Service                                                                     | 8       |
+| SCCM            | 16A         | SCCM            | 16A                        | Cambridge - Long Rd - Teversham - Fulbourn - Balsham - Gt Thurlow                    | 2       |
+| SCCM            | 17          | SCCM            | 17                         | Fen Estate - City Centre - Teversham - Fulbourn - The Wilbrahams                     | 2       |
+| SCCM            | 18          | SCCM            | 18                         | Cambridge - Cambourne                                                                | 24      |
+| SCCM            | 2           | SCBD            | 2                          | Bedford : Elstow Park & Ride - Town Centre                                           | 107     |
+| SCCM            | 2           | SCCM            | 2|Citi                     | Waterbeach - Science Park - Chesterton - City Centre - Addenbrookes                  | 147     |
+| SCCM            | 2           | SCPB            | 2|Citi                     | North Bretton - Paston                                                               | 149     |
+| SCCM            | 22          | SCHU            | 22                         | St Ives Town Circular                                                                | 10      |
+| SCCM            | 23          | SCPB            | 23                         | Peterborough - Lynch Wood                                                            | 9       |
+| SCCM            | 24          | SCPB            | 24                         | Peterborough - Lynch Wood                                                            | 2       |
+| SCCM            | 26          | SCCM            | 26                         | Cambridge - Foxton - Melbourn - Royston                                              | 22      |
+| SCCM            | 3           | SCBD            | 3                          | Bedford : Town Centre - Fenlake                                                      | 45      |
+| SCCM            | 3           | SCCM            | 3|Citi                     | Fison Road - City Centre - Rail Station - Cherry Hinton - Fulbourn                   | 162     |
+| SCCM            | 3           | SCPB            | 3|Citi                     | North Bretton - Peterborough - Stanground                                            | 142     |
+| SCCM            | 30          | SCHU            | 30                         | Huntingdon - RAF Wyton - Warboys - Ramsey                                            | 11      |
+| SCCM            | 31          | SCPB            | 31                         | Peterborough - Whittlesey - Ramsey                                                   | 13      |
+| SCCM            | 33          | SCPB            | 33                         | Peterborough - Whittlesey - March ( - Chatteris)                                     | 39      |
+| SCCM            | 35          | SCHU            | 35                         | March - Chatteris - Huntingdon                                                       | 13      |
+| SCCM            | 36          | SCPB            | 36                         | Peterborough - Thorney                                                               | 22      |
+| SCCM            | 37          | SCPB            | 37|InterConnect            | Peterborough - Spalding                                                              | 3       |
+| SCCM            | 37          | <null>          | <null>                     | <null>                                                                               | 22      |
+| SCCM            | 4           | SCBD            | 4                          | Bedford : Town Centre - Goldington                                                   | 61      |
+| SCCM            | 4           | SCCM            | 4|Citi                     | Cambridge - Hardwick - Cambourne                                                     | 82      |
+| SCCM            | 4           | SCPB            | 4|Citi                     | North Bretton - Peterborough - Parnwell                                              | 89      |
+| SCCM            | 41          | SCBD            | 41                         | Bedford - Northampton                                                                | 48      |
+| SCCM            | 42          | SCBD            | 42                         | Bedford - Ampthill - Flitwick                                                        | 24      |
+| SCCM            | 46          | SCPB            | 46                         | Peterborough - Yaxley - Stilton - Sawtry                                             | 6       |
+| SCCM            | 5           | SCBD            | 5                          | Bedford : Town Centre - Woodside - Goldington                                        | 133     |
+| SCCM            | 5           | SCHU            | 5|Citi                     | Cambridge - Bar Hill - Longstanton - Swavesey ( - Fenstanton)                        | 73      |
+| SCCM            | 5           | SCPB            | 5|Citi                     | Yaxley, Lansdowne Road - Welland, Belvior Way                                        | 157     |
+| SCCM            | 5           | <null>          | <null>                     | <null>                                                                               | 4       |
+| SCCM            | 51          | SCBD            | 51                         | Bedford - Clapham - Oakley                                                           | 41      |
+| SCCM            | 53          | SCBD            | 53                         | Bedford - Wootton - Cranfield - Cranfield University                                 | 78      |
+| SCCM            | 6           | SCBD            | 6                          | Bedford : Town Centre - Brickhill                                                    | 126     |
+| SCCM            | 6           | SCCM            | 6|Citi                     | Cambridge City Centre - Girton - Oakington                                           | 47      |
+| SCCM            | 6           | SCPB            | 6|Citi                     | Peterborough - Hampton College                                                       | 75      |
+| SCCM            | 6           | <null>          | <null>                     | <null>                                                                               | 7       |
+| SCCM            | 60          | SCPB            | 60                         | Peterborough - Orton Northgate                                                       | 7       |
+| SCCM            | 61          | SCPB            | 61                         | Peterborough - Newark, Sainsbury's                                                   | 24      |
+| SCCM            | 62          | SCPB            | 62                         | Peterborough - Maxey                                                                 | 12      |
+| SCCM            | 63          | SCPB            | 63                         | Peterborough - Parnwell                                                              | 5       |
+| SCCM            | 66          | SCHU            | 66                         | Huntingdon - Brampton - Buckden - St Neots                                           | 22      |
+| SCCM            | 7           | SCBD            | 7                          | Bedford : Town Centre - Putnoe - Woodside                                            | 58      |
+| SCCM            | 7           | SCCM            | 7|Citi                     | Saffron Walden - Duxford - Sawston - Cambridge                                       | 69      |
+| SCCM            | 71          | SCBD            | 71                         | Bedford - Hitchin                                                                    | 23      |
+| SCCM            | 72          | SCBD            | 72                         | Bedford - Hitchin                                                                    | 24      |
+| SCCM            | 73          | SCBD            | 73                         | Bedford - Biggleswade                                                                | 47      |
+| SCCM            | 8           | SCBD            | 8                          | Bedford : Town Centre - Great Denham                                                 | 61      |
+| SCCM            | 8           | SCCM            | 8|Citi                     | Cambridge - Impington - Histon - Cottenham                                           | 88      |
+| SCCM            | 81          | SCBD            | 81                         | Bedford - Luton                                                                      | 27      |
+| SCCM            | 9           | SCBD            | 9                          | Bedford : Town Centre - Shortstown                                                   | 126     |
+| SCCM            | 9           | SCCM            | 9                          | Cambridge - Waterbeach - Ely - Littleport - Chatteris                                | 65      |
+| SCCM            | 99          | SCBD            | 99                         | Luton Airport - Luton - Central Milton Keynes                                        | 35      |
+| SCCM            | A           | SCHU            | A|the busway               | Trumpington - Central Cambridge - Longstanton - St Ives                              | 114     |
+| SCCM            | A           | <null>          | <null>                     | <null>                                                                               | 3       |
+| SCCM            | B           | SCHU            | B|the busway               | Central Cambridge - Longstanton - St Ives - Huntingdon - Peterborough                | 136     |
+| SCCM            | N           | SCHU            | N                          | Cambridge - Longstanton - St Ives                                                    | 26      |
+| SCCM            | PR1         | SCCM            | Madingley Road Park & Ride | Cambridge : City Centre - Madingley Road Park & Ride                                 | 141     |
+| SCCM            | PR2         | SCCM            | Newmarket Road Park & Ride | Cambridge : City Centre - Newmarket Road Park & Ride                                 | 140     |
+| SCCM            | PR3         | SCCM            | Trumpington Park & Ride    | Cambridge : City Centre - Trumpington Park & Ride                                    | 105     |
+| SCCM            | PR4         | SCCM            | Babraham Road Park & Ride  | Cambridge City Centre - Babraham Road Park & Ride                                    | 154     |
+| SCCM            | PR5         | SCCM            | Milton Road Park & Ride    | Cambridge City Centre - Milton Park & Ride                                           | 113     |
+| SCCM            | R           | SCHU            | R|the busway               | Trumpington P & R - Cambridge Rail Station                                           | 56      |
+| SCCM            | Tour        | <null>          | <null>                     | <null>                                                                               | 11      |
+| SCCM            | X13         | SCCM            | X13                        | Cambridge - Linton - Haverhill                                                       | 8       |
+| SCCM            | X13         | <null>          | <null>                     | <null>                                                                               | 1       |
+| SCCM            | X5          | SCBD            | X5                         | Cambridge - Bedford - Milton Keynes - Oxford                                         | 196     |
+| SCCM            | X9          | SCCM            | 9                          | Cambridge - Waterbeach - Ely - Littleport - Chatteris                                | 1       |
+| SCCM            | X9          | SCCM            | X9                         | Cambridge - Ely - Littleport                                                         | 11      |
+| SCFensOVD       | X31         | <null>          | <null>                     | <null>                                                                               | 1       |
+| SCNH            | 1           | SCNH            | 1                          | Welland Vale - Corby Town Centre - Taunton Avenue                                    | 105     |
+| SCNH            | 10          | SCNH            | 10                         | West Hunsbury - Northampton Town Centre - Parklands - Moulton - Mawsley - Kettering  | 14      |
+| SCNH            | 10          | SCWW            | 10                         | Rugby - DIRFT - Middlemore - Timken - Daventry - Monksmoor                           | 1       |
+| SCNH            | 14          | SCNH            | 14                         | Wellingborough - Irchester - Rushden                                                 | 22      |
+| SCNH            | 15          | SCNH            | 15                         | Almond Road - Kettering Town Centre - Tesco, Orion Way                               | 54      |
+| SCNH            | 19          | SCNH            | 19                         | Kettering - Rothwell - Desborough - Corby                                            | 89      |
+| SCNH            | 2           | SCNH            | 2                          | Corby Town Centre - Weldon Industry - Priors Hall                                    | 7       |
+| SCNH            | 23          | SCNH            | 23                         | Peterborough - Lynch Wood                                                            | 12      |
+| SCNH            | 23          | SCPB            | 23                         | Peterborough - Lynch Wood                                                            | 1       |
+| SCNH            | 24          | SCNH            | 24                         | Peterborough - Oundle - Thrapston                                                    | 13      |
+| SCNH            | 2A          | SCNH            | 2A                         | Corby Estates - Corby Town Centre - Weldon Industry - Asda                           | 5       |
+| SCNH            | 2B          | SCNH            | 2B                         | Kettering - Corby - Weldon Industry                                                  | 1       |
+| SCNH            | 3           | SCNH            | 3                          | Shire Road - Corby Town Centre - Danesholme                                          | 127     |
+| SCNH            | 4           | SCNH            | 4                          | Corby Town Centre - Corby Estates - Earlstrees Industry                              | 6       |
+| SCNH            | 4           | <null>          | <null>                     | <null>                                                                               | 1       |
+| SCNH            | 44          | SCNH            | 44                         | Barnwell Road - Wellingborough - Irthlingborough                                     | 8       |
+| SCNH            | 45          | SCNH            | 45                         | Berrymoor - Wellingborough - Irthlingborough - Raunds                                | 24      |
+| SCNH            | 48          | SCNH            | 48                         | Burton Latimer - Kettering Town Centre                                               | 4       |
+| SCNH            | 49          | SCNH            | 49                         | Rushden Lakes - Rushden - Irthlingborough - Finedon - Kettering                      | 26      |
+| SCNH            | 50          | SCNH            | 50                         | Bedford - Rushden - Kettering                                                        | 44      |
+| SCNH            | 89          | SCNH            | 89                         | Northampton - Blisworth - Towcester - Deanshanger - Milton Keynes                    | 8       |
+| SCNH            | 9           | SCNH            | 9                          | Kettering : Town Centre - Brambleside - Northfield Avenue - Town Centre              | 10      |
+| SCNH            | 91          | SCNH            | 91                         | Milton Keynes - Old Stratford - Deanshanger - Buckingham                             | 3       |
+| SCNH            | D1          | SCNH            | D1                         | Northampton - Weedon - Daventry - Grange Estate                                      | 1       |
+| SCNH            | RL1         | SCNH            | RL1                        | Kings Heath - Northampton - Rushden Lakes                                            | 6       |
+| SCNH            | W1          | <null>          | <null>                     | <null>                                                                               | 35      |
+| SCNH            | W2          | <null>          | <null>                     | <null>                                                                               | 36      |
+| SCNH            | X1          | SCNH            | X1                         | Priors Hall - Asda - Corby Town Centre - Kettering - Burton Latimer                  | 48      |
+| SCNH            | X10         | SCNH            | X10                        | West Hunsbury - Northampton - Broughton - Kettering - Desborough - Market Harborough | 43      |
+| SCNH            | X4          | SCNH            | X4                         | Milton Keynes - Northampton - Corby - Peterborough                                   | 107     |
+| SCNH            | X4          | <null>          | <null>                     | <null>                                                                               | 22      |
+| SCNH            | X44         | SCNH            | X44                        | Wellingborough - Earls Barton - Brackmills                                           | 6       |
+| SCNH            | X47         | SCNH            | X47                        | Northampton - Earls Barton - Great Doddington - Wellingborough - Rushden - Raunds    | 33      |
+| SCNH            | X7          | SCNH            | X7                         | Milton Keynes - Northampton - Brixworth - Market Harborough - Leicester              | 19      |
+| SCNH            | X89         | SCNH            | X89                        | Northampton - Blisworth - Towcester - Deanshanger - Milton Keynes                    | 5       |
+| WP              | 31          | WHIP            | 31                         | Cambridge - Stapleford - Fowlmere                                                    | 11      |
+| WP              | 400         | WHIP            | 400                        | Huntingdon - Spaldwick - Huntingdon                                                  | 1       |
+| WP              | 478         | <null>          | <null>                     | <null>                                                                               | 4       |
+| WP              | 6           | WHIP            | 6                          | St Neots - Papworth Everard - Hilton                                                 | 1       |
+| WP              | 61          | WHIP            | 61                         | Eynesbury - St Neots - Eaton Socon Circular                                          | 5       |
+| WP              | 62          | WHIP            | 62                         | Eynesbury - Town Centre - Eaton Ford - Eaton Socon - Town Centre - E                 | 2       |
+| WP              | 63          | WHIP            | 63                         | Eynesbury - St Neots - Eaton Socon Circular                                          | 1       |
+| WP              | 75          | <null>          | <null>                     | <null>                                                                               | 10      |
+| WP              | C           | WHIP            | C|the busway               | Somersham - St Ives - Longstanton - Central Cambridge - Rail Station                 | 30      |
+| WP              | U           | WHIP            | U                          | Madingley Road P & R - Addenbrookes Hospital                                         | 75      |
+| ZSIN            | 33          | ZSIN            | 33                         | Central Milton Keynes - Wolverton - Hanslope - Roade - Northampton                   | 1       |
+| ZSIN            | 33          | <null>          | <null>                     | <null>                                                                               | 3       |
+| ZSIN            | 33A         | <null>          | <null>                     | <null>                                                                               | 5       |
++-----------------+-------------+-----------------+----------------------------+--------------------------------------------------------------------------------------+---------+
+SELECT 174
+
