@@ -8,7 +8,8 @@ LOAD CSV
           destination,
           line_name,
           operator_code,
-          vehicle_ref
+          vehicle_ref,
+          bbox
        )
     WITH truncate,
          drop indexes,

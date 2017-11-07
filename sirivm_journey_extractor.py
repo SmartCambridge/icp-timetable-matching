@@ -42,8 +42,18 @@ import csv
         },
 '''
 
-keys = []
-results = []
+def update_bbox(box, lat, lng):
+    if lat < box[0]:
+        box[0] = lat
+    if lng < box[1]:
+        box[1] = lng
+    if lat > box[2]:
+        box[2] = lat
+    if lng > box[3]:
+        box[3] = lng
+
+
+results = {}
 
 csvwriter = csv.writer(sys.stdout)
 
@@ -62,13 +72,16 @@ for directory in sys.argv[1:]:
         for record in data["request_data"]:
 
            time = record["OriginAimedDepartureTime"][11:19]
-           key = [ record["OriginRef"], record["DestinationRef"], time ]
+           key = ( record["OriginRef"], record["DestinationRef"], time )
 
-           if not key in keys:
-               keys.append(key)
-               results.append(record)
+           if not key in results:
+               results[key] = record
+               results[key]['bbox'] = [record['acp_lat'], record['acp_lng'],
+                                       record['acp_lat'], record['acp_lng']]
+           else:
+               update_bbox(results[key]['bbox'], record['acp_lat'], record['acp_lng'])
 
-for result in results:
+for result in results.values():
     csvwriter.writerow((
         result['OriginAimedDepartureTime'][0:10],
         result['OriginAimedDepartureTime'][11:19],
@@ -76,5 +89,6 @@ for result in results:
         result['DestinationRef'],
         result['LineRef'],
         result['OperatorRef'],
-        result['VehicleRef']
+        result['VehicleRef'],
+        '( %f, %f ), ( %f, %f )' % tuple(result['bbox'])
         ))

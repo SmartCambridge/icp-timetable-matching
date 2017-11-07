@@ -10,13 +10,29 @@ import xml.etree.ElementTree as ET
 import csv
 import txc_helper
 import csv
+import psycopg2
 import datetime
+
 
 day = datetime.date(2017, 10, 27)
 
 ns = {'n': 'http://www.transxchange.org.uk/'}
 
 csv_writer = csv.writer(sys.stdout)
+
+conn = psycopg2.connect("dbname='icp' host='localhost'")
+cur = conn.cursor()
+query = "select Latitude, Longitude from naptan where ATCOCode = %s"
+
+def update_bbox(box, lat, lng):
+    if box[0] is None or lat < box[0]:
+        box[0] = lat
+    if box[1] is None or lng < box[1]:
+        box[1] = lng
+    if box[2] is None or lat > box[2]:
+        box[2] = lat
+    if box[3] is None or lng > box[3]:
+        box[3] = lng
 
 def process(filename, region, file):
   """ Process one TNDS data file """
@@ -74,6 +90,25 @@ def process(filename, region, file):
         fr = journey_pattern_section.find("n:JourneyPatternTimingLink[1]/n:From/n:StopPointRef", ns).text
         to = journey_pattern_section.find("n:JourneyPatternTimingLink[last()]/n:To/n:StopPointRef", ns).text
 
+        # Find the bounding box for the journey - all the from references first
+        bbox = [None, None, None, None]
+        for stop_point_ref in journey_pattern_section.findall("n:JourneyPatternTimingLink/n:From/n:StopPointRef", ns):
+            stop_point = stop_point_ref.text
+            cur.execute(query, (stop_point,))
+            row = cur.fetchone()
+            if row:
+                update_bbox(bbox, row[0], row[1])
+            else:
+                print('Failed to locate %s' % stop_point, file=sys.stderr)
+        # And then the 'To' of the last one
+        cur.execute(query, (to,))
+        row = cur.fetchone()
+        if row:
+            update_bbox(bbox, row[0], row[1])
+        else:
+            print('Failed to locate %s' % to, file=sys.stderr)
+
+
         csv_writer.writerow((
           region,
           file,
@@ -87,7 +122,8 @@ def process(filename, region, file):
           service_end,
           line_name,
           operator_code,
-          journey_code
+          journey_code,
+          '( %f, %f ), ( %f, %f )' % tuple(bbox)
           ))
 
 

@@ -14,7 +14,8 @@ LOAD CSV
           service_end,
           line_name,
           operator_code,
-          journey_code
+          journey_code,
+          bbox
        )
     WITH truncate,
          drop indexes,
