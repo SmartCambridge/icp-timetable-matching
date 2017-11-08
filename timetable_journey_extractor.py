@@ -98,7 +98,7 @@ def process(filename, region, file):
             stop_point = stop_point_ref.text
             cur.execute(query, (stop_point,))
             row = cur.fetchone()
-            # Only append to stops if we got lat.lng to keep
+            # Only append to stops if we got lat, lng to keep
             # stops and points in step
             if row:
                 update_bbox(bbox, row[0], row[1])
