@@ -92,12 +92,18 @@ def process(filename, region, file):
 
         # Find the bounding box for the journey - all the from references first
         bbox = [None, None, None, None]
+        points = []
+        stops = []
         for stop_point_ref in journey_pattern_section.findall("n:JourneyPatternTimingLink/n:From/n:StopPointRef", ns):
             stop_point = stop_point_ref.text
             cur.execute(query, (stop_point,))
             row = cur.fetchone()
+            # Only append to stops if we got lat.lng to keep
+            # stops and points in step
             if row:
                 update_bbox(bbox, row[0], row[1])
+                points.append([row[0], row[1]])
+                stops.append(stop_point)
             else:
                 print('Failed to locate %s' % stop_point, file=sys.stderr)
         # And then the 'To' of the last one
@@ -105,6 +111,8 @@ def process(filename, region, file):
         row = cur.fetchone()
         if row:
             update_bbox(bbox, row[0], row[1])
+            points.append([row[0], row[1]])
+            stops.append(to)
         else:
             print('Failed to locate %s' % to, file=sys.stderr)
 
@@ -123,7 +131,9 @@ def process(filename, region, file):
           line_name,
           operator_code,
           journey_code,
-          '( %f, %f ), ( %f, %f )' % tuple(bbox)
+          '( %f, %f ), ( %f, %f )' % tuple(bbox),
+          '{ ' + ', '.join([ ' "(%f, %f)" ' % tuple(point) for point in points]) + ' }',
+          '{ ' + ', '.join([ ' "%s" ' % (stop) for stop in stops]) + ' }'
           ))
 
 

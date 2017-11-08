@@ -15,12 +15,14 @@ LOAD CSV
           line_name,
           operator_code,
           journey_code,
-          bbox
+          bbox,
+          points,
+          stops
        )
     WITH truncate,
          drop indexes,
          fields enclosed by '"',
-         fields escaped by backslash-quote,
+         fields escaped by double-quote,
          fields terminated by ','
 
     SET work_mem to '32 MB', maintenance_work_mem to '64 MB';

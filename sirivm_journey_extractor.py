@@ -76,10 +76,14 @@ for directory in sys.argv[1:]:
 
            if not key in results:
                results[key] = record
+               results[key]['points'] = [[record['acp_lat'], record['acp_lng']]]
                results[key]['bbox'] = [record['acp_lat'], record['acp_lng'],
                                        record['acp_lat'], record['acp_lng']]
            else:
+               results[key]['points'].append([record['acp_lat'], record['acp_lng']])
                update_bbox(results[key]['bbox'], record['acp_lat'], record['acp_lng'])
+
+
 
 for result in results.values():
     csvwriter.writerow((
@@ -90,5 +94,6 @@ for result in results.values():
         result['LineRef'],
         result['OperatorRef'],
         result['VehicleRef'],
-        '( %f, %f ), ( %f, %f )' % tuple(result['bbox'])
+        '( %f, %f ), ( %f, %f )' % tuple(result['bbox']),
+        '{ ' + ', '.join([ ' "(%f, %f)" ' % tuple(point) for point in result['points']]) + ' }'
         ))
