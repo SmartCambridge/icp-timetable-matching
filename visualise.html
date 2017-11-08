@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;
+                                             charset=utf-8">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+  integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+  crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+  integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+  crossorigin=""></script>
+
+    <script type="text/javascript" src="boxes.js"></script>
+
+    <script type="text/javascript">
+
+var map
+var sbbox
+var tbbox
+
+function init(){
+
+  map = new L.Map('map');
+
+  var uoc = new
+    //L.TileLayer('http://map.cam.ac.uk/tiles/{z}/{x}/{y}.png',
+    L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+      attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a></a>',
+      maxZoom: 19
+    }
+  );
+
+  var cambridge = new L.LatLng(52.20038, 0.1197);
+  map.setView(cambridge, 9).addLayer(uoc);
+
+  console.log('About to draw boxes');
+
+  var text = ''
+
+  items.forEach(function(item, index) {
+
+    console.log("Doing item ", item['name'])
+
+    text = text.concat('<a onclick="show_item(', index, ')">', item['name'], '</a><br/>')
+
+  })
+
+  document.getElementById('list').innerHTML = text
+
+}
+
+function show_item(item) {
+
+    [sbbox, tbbox].forEach(function(box){
+        console.log("removing", box)
+        if (box) {
+          box.remove()
+        }
+    })
+
+    sbbox = L.rectangle(items[item]['sbbox'], { color: 'red', weight: 1}).addTo(map)
+    tbbox = L.rectangle(items[item]['tbbox'], { color: 'green', weight: 1}).addTo(map)
+
+}
+
+    </script>
+    <title>SIRI-VM vs. TNDS Timetable bounding boxes</title>
+  </head>
+
+  <body onload="init()">
+
+    <h1>SIRI-VM vs. TNDS Timetable bounding boxes</h1>
+
+    <p id='list'></p>
+
+    <div id="map" style="height: 1200px; border: 1px solid black;"></div>
+
+  </body>
+
+</html>
+
+
+red blue green aqua fuchsia olive purple yellow black lime maroon teal
