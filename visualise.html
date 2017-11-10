@@ -12,13 +12,17 @@
   integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
   crossorigin=""></script>
 
+  <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+
     <script type="text/javascript" src="boxes.js"></script>
 
     <script type="text/javascript">
 
 var map
-var sbbox
-var tbbox
+var markers=[]
 
 function init(){
 
@@ -36,35 +40,61 @@ function init(){
   var cambridge = new L.LatLng(52.20038, 0.1197);
   map.setView(cambridge, 9).addLayer(uoc);
 
-  console.log('About to draw boxes');
-
-  var text = ''
-
+  var list = $("#list").empty()
+  list.append($("<option>").attr('value','').text('--Please choose--'));
   items.forEach(function(item, index) {
-
-    console.log("Doing item ", item['name'])
-
-    text = text.concat('<a onclick="show_item(', index, ')">', item['name'], '</a><br/>')
-
+    list.append($("<option>").attr('value',index).text(item['name']));
   })
 
-  document.getElementById('list').innerHTML = text
+  list.change("change", show_item)
 
 }
 
-function show_item(item) {
+function show_item(obj) {
 
-    [sbbox, tbbox].forEach(function(box){
-        console.log("removing", box)
-        if (box) {
-          box.remove()
-        }
-    })
+    console.log(obj)
+    console.log(obj.currentTarget)
+    console.log(obj.currentTarget.value)
 
-    sbbox = L.rectangle(items[item]['sbbox'], { color: 'red', weight: 1}).addTo(map)
-    tbbox = L.rectangle(items[item]['tbbox'], { color: 'green', weight: 1}).addTo(map)
+    var item = obj.currentTarget.value
 
+    console.log("Selected item ", item)
+
+    if (item != '') {
+
+      markers.forEach(function(marker){
+        marker.remove()
+      })
+      markers = []
+
+      // SIRI journey
+      var s = items[item]['sbbox']
+      sbbox = L.rectangle(s, { color: 'red', weight: 1}).addTo(map)
+      smarker = L.marker([(s[0][0]+s[1][0])/2, (s[0][1]+s[1][1])/2]).addTo(map)
+      spath = L.polyline(items[item]['spoints'], {color: 'red'}).addTo(map)
+      markers.push(sbbox, smarker, spath)
+      items[item]['spoints'].forEach(function(point, index){
+        var circle = L.circleMarker(point, {radius: 2, fillOpacity: 1, color: 'blue'}).addTo(map);
+        markers.push(circle)
+      })
+
+      // Timetable journey
+      var t = items[item]['tbbox']
+      tbbox = L.rectangle(t, { color: 'green', weight: 1}).addTo(map)
+      tmarker = L.marker([(t[0][0]+t[1][0])/2, (t[0][1]+t[1][1])/2]).addTo(map)
+      tpath = L.polyline(items[item]['tpoints'], {color: 'green'}).addTo(map)
+      markers.push(tbbox, tmarker, tpath)
+      items[item]['tpoints'].forEach(function(point, index){
+        var circle = L.circleMarker(point, {radius: 2, fillOpacity: 1, color: 'blue'}).addTo(map);
+        circle.bindTooltip(items[item]['tstops'][index])
+        markers.push(circle)
+      })
+
+      var group = new L.featureGroup([sbbox, tbbox]);
+      map.fitBounds(group.getBounds());
+    }
 }
+
 
     </script>
     <title>SIRI-VM vs. TNDS Timetable bounding boxes</title>
@@ -74,13 +104,12 @@ function show_item(item) {
 
     <h1>SIRI-VM vs. TNDS Timetable bounding boxes</h1>
 
-    <p id='list'></p>
+    <p>
+    <select id='list'></select>
+    </p>
 
     <div id="map" style="height: 1200px; border: 1px solid black;"></div>
 
   </body>
 
 </html>
-
-
-red blue green aqua fuchsia olive purple yellow black lime maroon teal
