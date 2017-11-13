@@ -144,16 +144,75 @@ s.destination = nd.atcocode where t.day is null order by
 s.operator_code, s.line_name;
 ```
 
-For rows representing matches there are 110 rows where the bounding box
-of the SIRI-VM journey doesn't overlap the bounding box of the matched
-timetable record at all. In all cases the SIRI-VM OperatorRef and
-LineName match the timetable OperatorCode and LineName (in meaning, if
-not exactly, see 'Misc Observations' below). This represents buses that
-that are believed to be undertaking one timetable journey while actually
-following some completely different path. It is entirely possible that
-there are further examples of this effect that are going unnoticed
-because the bounding boxes overlap even though the SIRI and timetable
-paths are still distinct.
+For rows representing matches (on departure time, origin and
+destination) there are 112 rows where the bounding box of the SIRI-VM
+journey doesn't overlap the bounding box of the matched timetable record
+at all. In all cases the SIRI-VM OperatorRef and LineName also match
+match the timetable OperatorCode and LineName (in meaning, if not
+exactly, see 'Misc Observations' below). This represents buses that that
+are claiming to be undertaking one timetable journey while actually
+following some completely different path. In many cases this path is
+short - 20 paths have fewer than 20 monitoring reports - which may
+represent vehicles that briefly broadcast the wrong Timetable Journey
+information prior to being corrected. It is entirely possible that there
+are further examples of this effect that are going unnoticed because the
+bounding boxes overlap even though the SIRI and timetable paths are
+still distinct.
+
+```
+select s.operator_code, s.line_name, t.operator_code, t.line_name from
+sirivm_journeys as s inner join timetable_journeys as t on
+s.departure_time = t.departure_time and s.origin = t.origin and
+s.destination = t.destination where not s.bbox && t.bbox;
+
+select array_length(s.time, 1) from sirivm_journeys as s inner join
+timetable_journeys as t on s.departure_time = t.departure_time and
+s.origin = t.origin and s.destination = t.destination where not s.bbox
+&& t.bbox order by array_length(s.time, 1);
+```
+
+Of these rows, 92 represent Timetable Journeys that correspond to more
+than one vehicle journey. These probably represent one vehicle correctly
+reporting the timetable journey that it is following and one (or more)
+vehicles claiming to be following this journey while doing something
+else. The remaining 20 records probably represent a single vehicle that
+is claiming to be servicing one Timetable Journey while actually doing
+something else.
+
+```
+select count(*), c from (select count(*) as c from sirivm_journeys as s
+join (select s.departure_time as departure_time, s.origin as origin,
+s.destination as destination from sirivm_journeys as s inner join
+timetable_journeys as t on s.departure_time = t.departure_time and
+s.origin = t.origin and s.destination = t.destination where not s.bbox
+&& t.bbox) as orphans on s.departure_time = orphans.departure_time and
+s.origin = orphans.origin and s.destination = orphans.destination group
+by s.departure_time, s.origin, s.destination) as x group by c
+```
+
+Of matches of SIRI and Timetable journeys there are 135 distinct
+(Operator Code, Line Name) pairs.
+
+```
+select distinct t.operator_code, t.line_name from sirivm_journeys as s
+join timetable_journeys as t on s.departure_time = t.departure_time and
+s.origin = t.origin and s.destination = t.destination;
+```
+
+Of the 106505 timetabled journeys for this day, there are 7757 with this
+combination of (Operator Code, Line Name) pairs. Given that we have about
+6000 matched vehicle journeys this suggests that we are not seeing
+vehicle monitoring data for something like 1700 timetabled journeys that
+we'd expect to be seeing.
+
+```
+select t.journey_code from timetable_journeys as t inner join (select
+distinct t.operator_code as operator_code, t.line_name as line_name from
+sirivm_journeys as s join timetable_journeys as t on s.departure_time =
+t.departure_time and s.origin = t.origin and s.destination =
+t.destination) as m on t.operator_code = m.operator_code and t.line_name
+= m.line_name;
+```
 
 Joining on departure time and origin only
 -----------------------------------------
