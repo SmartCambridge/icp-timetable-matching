@@ -1,2 +1,5 @@
 *.csv
 boxes.js
+*.pdf
+node_modules/
+package-lock.json

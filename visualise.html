@@ -17,6 +17,8 @@
   integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
   crossorigin="anonymous"></script>
 
+    <script src="string-format.js"></script>
+
     <script type="text/javascript" src="boxes.js"></script>
 
     <script type="text/javascript">
@@ -41,9 +43,13 @@ function init(){
   map.setView(cambridge, 9).addLayer(uoc);
 
   var list = $("#list").empty()
-  list.append($("<option>").attr('value','').text('--Please choose--'));
+  list.append($("<option>").attr('value','').text('--Please choose a journey--'));
   items.forEach(function(item, index) {
-    list.append($("<option>").attr('value',index).text(item['name']));
+    console.log(item)
+    console.log(item['operator_code'])
+    var desc = format('{operator_code} {line_name} {direction} {departure_time} {journey_code} {origin_description} --> {destination_description} [{vehicle_ref}]', item)
+    //var desc = item['operator_code']
+    list.append($("<option>").attr('value',index).text(desc));
   })
 
   list.change("change", show_item)
@@ -75,6 +81,7 @@ function show_item(obj) {
       markers.push(sbbox, smarker, spath)
       items[item]['spoints'].forEach(function(point, index){
         var circle = L.circleMarker(point, {radius: 2, fillOpacity: 1, color: 'blue'}).addTo(map);
+        circle.bindTooltip(items[item]['times'][index])
         markers.push(circle)
       })
 

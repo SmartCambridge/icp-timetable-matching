@@ -17,7 +17,8 @@ LOAD CSV
           journey_code,
           bbox,
           points,
-          stops
+          stops,
+          direction
        )
     WITH truncate,
          drop indexes,

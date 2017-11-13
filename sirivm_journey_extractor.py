@@ -72,15 +72,17 @@ for directory in sys.argv[1:]:
         for record in data["request_data"]:
 
            time = record["OriginAimedDepartureTime"][11:19]
-           key = ( record["OriginRef"], record["DestinationRef"], time )
+           key = ( record['VehicleRef'], record["OriginRef"], record["DestinationRef"], time )
 
            if not key in results:
                results[key] = record
                results[key]['points'] = [[record['acp_lat'], record['acp_lng']]]
+               results[key]['times'] = [record['RecordedAtTime']]
                results[key]['bbox'] = [record['acp_lat'], record['acp_lng'],
                                        record['acp_lat'], record['acp_lng']]
            else:
                results[key]['points'].append([record['acp_lat'], record['acp_lng']])
+               results[key]['times'].append(record['RecordedAtTime'])
                update_bbox(results[key]['bbox'], record['acp_lat'], record['acp_lng'])
 
 
@@ -95,5 +97,6 @@ for result in results.values():
         result['OperatorRef'],
         result['VehicleRef'],
         '( %f, %f ), ( %f, %f )' % tuple(result['bbox']),
-        '{ ' + ', '.join([ ' "(%f, %f)" ' % tuple(point) for point in result['points']]) + ' }'
+        '{ ' + ', '.join([ ' "(%f, %f)" ' % tuple(point) for point in result['points']]) + ' }',
+        '{ ' + ', '.join([ ' "%s" ' % (time) for time in result['times']]) + ' }',
         ))

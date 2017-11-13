@@ -10,7 +10,8 @@ LOAD CSV
           operator_code,
           vehicle_ref,
           bbox,
-          points
+          points,
+          time
        )
     WITH truncate,
          drop indexes,

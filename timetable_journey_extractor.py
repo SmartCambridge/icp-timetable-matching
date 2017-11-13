@@ -77,13 +77,17 @@ def process(filename, region, file):
 
       # If this VehicleJourney applies...
       if journey_op.should_show(day):
- 
+
         journey_code = journey.find('n:VehicleJourneyCode', ns).text
         departure_time = journey.find('n:DepartureTime', ns).text
         journey_pattern_ref = journey.find('n:JourneyPatternRef', ns).text
 
-        # Find corresponding JoureyPattern and JourneyPatternSection
-        journey_pattern_section_ref = tree.find("n:Services/n:Service/n:StandardService/n:JourneyPattern[@id='%s']/n:JourneyPatternSectionRefs" % journey_pattern_ref, ns).text
+        # Find corresponding JoureyPattern
+        journey_pattern = tree.find("n:Services/n:Service/n:StandardService/n:JourneyPattern[@id='%s']" % journey_pattern_ref, ns)
+        direction = journey_pattern.find("n:Direction", ns).text
+
+        # and JourneyPatternSection
+        journey_pattern_section_ref = journey_pattern.find("n:JourneyPatternSectionRefs", ns).text
         journey_pattern_section = tree.find("n:JourneyPatternSections/n:JourneyPatternSection[@id='%s']" % journey_pattern_section_ref, ns)
 
         # Get first and last stop
@@ -133,7 +137,8 @@ def process(filename, region, file):
           journey_code,
           '( %f, %f ), ( %f, %f )' % tuple(bbox),
           '{ ' + ', '.join([ ' "(%f, %f)" ' % tuple(point) for point in points]) + ' }',
-          '{ ' + ', '.join([ ' "%s" ' % (stop) for stop in stops]) + ' }'
+          '{ ' + ', '.join([ ' "%s" ' % (stop) for stop in stops]) + ' }',
+          direction
           ))
 
 

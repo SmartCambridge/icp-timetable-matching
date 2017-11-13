@@ -1,46 +1,35 @@
 SIRI <--> TNDS Timetable matching
-================================
+=================================
 
-2017-11-07
-
-Import the timetable for a particular day (encoded in the source,
-currently 2017-10-27):
-
-```
-PYTHONPATH=../operating_profile/ ./timetable_journey_extractor.py
-../TNDS_bus_data/sections/ | pgloader timetable_journeys.load
-```
-
-(script currently extracts EA+EM+SE regions only)
-
-Load siri-vm.json data for 2017-10-27:
-
-```
-./sirivm_journey_extractor.py
-../siri/sirivm_json/data_bin/2017/10/27/ | pgloader sirivm_journeys.load
-```
+**Version 1, 2017-11-10**
 
 Looking at data for Friday 27 October 2017
 
 Timetable
 ---------
 
-Using TNDS data for EA+EM+SE Extracted 106505 timetabled journeys.
+Using TNDS data for the EA, EM and SE regions. Extracted 106505 timetabled journeys for
+this day.
 
 ```
 select count(*) from timetable_journeys;
 ```
 
-Of these there are 564 groups of journeys with the same departure time,
-origin and destination, and 2097 groups with the same departure time and
-origin.
+There all have unique VehicleJourneyCodes.
+
+Of these, there are 105901 distinct journeys (604 fewer) based on
+DepartureTime and first and last StopPointRef, and 104232 journeys (a
+further 1,669 fewer) based on DepartureTime and first StopPointRef only,
+meaning there are a significant number of duplicated journeys (i.e. more
+than  one timetabled journey over the same route at the same time) on
+these bases.
 
 ```
-select count(*) from (select 1 from timetable_journeys group by
-departure_time, origin, destination having count(*) > 1) as x;
+select count(*) from (select distinct departure_time, origin,
+destination from timetable_journeys) as x;
 
-select count(*) from (select 1 from timetable_journeys group by
-departure_time, origin having count(*) > 1) as x;
+select count(*) from (select distinct departure_time, origin from
+timetable_journeys) as x;
 ```
 
 Many of these appear to be actually duplicated journeys, either within
@@ -49,53 +38,66 @@ Service/Line (and so TNDS file), or split across Service/Lines (files).
 Journeys
 --------
 
-6199 distinct SIRI VM journeys based on departure time, origin and
-destination.
+6362 distinct SIRI VM journeys based on VehicleRef, OriginAimedDepartureTime,
+OriginRef and DestinationRef.
 
 ```
 select count(*) from sirivm_journeys;
 ```
 
-These contains 6152 distinct SIRI VM journeys based on departure time
-and origin only, meaning there are 47 duplicate journeys on this basis.
+Of these, there are 6199 distinct SIRI VM journeys (163 fewer) based on
+just OriginAimedDepartureTime, OriginRef and DestinationRef, and 6152 (a
+further 47 fewer) based on OriginAimedDepartureTime and OriginRef
+only, meaning that there are a significant number of duplicate journeys
+(i.e. more than one vehicle apparently servicing the same timetable
+journey) on these bases.
+
 
 ```
+select count(*) from (select distinct departure_time, origin,
+destination from sirivm_journeys) as x;
+
 select count(*) from (select distinct departure_time, origin from
-sirivm_journeys) as x; 
+sirivm_journeys) as x;
 ```
 
 Joining on departure time, origin and destination
 -------------------------------------------------
 
 Joining SIRI journeys on Timetable journeys by departure time, origin
-and destination gives 6202 rows 
+and destination gives 6366 rows
 
 ```
 select count(*) from sirivm_journeys as s left join
 timetable_journeys as t on s.departure_time = t.departure_time and
-s.origin = t.origin and s.destination = t.destination; 
+s.origin = t.origin and s.destination = t.destination;
 ```
 
-of which 5758 (93%) matched a timetable entry and 444 (7%) didn't.
+of which 451 (7%) didn't match, 5907 (83%) represented SIRI-VM journeys
+matching a single Timetable journey, and 8 (0%) represent  SIRI-VM
+journeys matching multiple timetable journeys.
 
-``` 
-select count(*) from sirivm_journeys as s left join
-timetable_journeys as t on s.departure_time = t.departure_time and
-s.origin = t.origin and s.destination = t.destination where t.day is not
-null;
-
-select count(*) from sirivm_journeys as s left join timetable_journeys
-as t on s.departure_time = t.departure_time and s.origin = t.origin and
-s.destination = t.destination where t.day is null; 
+```
+select c, count(*) from (select count(distinct(t.serial)) as c from
+sirivm_journeys as s left join timetable_journeys as t on
+s.departure_time = t.departure_time and s.origin = t.origin and
+s.destination = t.destination group by s.serial) as s group by c;
 ```
 
-6199 journeys of which 444 didn't match leaves 5755 that did. 5758
-matched rows for 5755 journeys means we got three extra records as a
-result of duplication. In this case this was as a result of three
-records each of which were duplicated once, presumably as a result of
-matching duplicate timetable records.
+Further, of the 5907 + 8 = 5951 rows representing a match, 5601 represent
+timetable journeys matching a single SIRI-VM journey and 314 represent
+timetable journeys matching multiple SIRI-VM journeys.
 
-``` 
+```
+select c, count(*) from (select count(distinct(s.serial)) as c from
+sirivm_journeys as s left join timetable_journeys as t on
+s.departure_time = t.departure_time and s.origin = t.origin and
+s.destination = t.destination group by t.serial) as s group by c;
+```
+
+The following allow multiple matches to be investigated:
+
+```
 select s.departure_time, s.origin, s.destination, count(*) from
 sirivm_journeys as s left join timetable_journeys as t on
 s.departure_time = t.departure_time and s.origin = t.origin and
@@ -112,19 +114,10 @@ t.destination group by s.departure_time, s.origin, s.destination having
 count(*) > 1) as x on s.departure_time = x.departure_time and s.origin =
 x.origin and s.destination = x.destination left join naptanplus as no on
 s.origin = no.atcocode left join naptanplus as nd on s.destination =
-nd.atcocode; 
+nd.atcocode;
 ```
 
 Investigating the ones that didn't match:
-
-``` 
-select s.*, no.description, nd.description from sirivm_journeys as s
-left join timetable_journeys as t on s.departure_time = t.departure_time
-and s.origin = t.origin and s.destination = t.destination left join
-naptanplus as no on s.origin = no.atcocode left join naptanplus as nd on
-s.destination = nd.atcocode where t.day is null order by
-s.operator_code, s.line_name; 
-```
 
 * Three journeys on SCCM/A|The Busway from St Ives Bus Station to
 Somersham 17:30, 18:21 and 18:46. Exist in the timetable, but with a
@@ -142,37 +135,52 @@ Centre. All in timetable but a) with different City Centre stop
 and b) slightly different departure times for the journeys into
 Cambridge.
 
+```
+select s.*, no.description, nd.description from sirivm_journeys as s
+left join timetable_journeys as t on s.departure_time = t.departure_time
+and s.origin = t.origin and s.destination = t.destination left join
+naptanplus as no on s.origin = no.atcocode left join naptanplus as nd on
+s.destination = nd.atcocode where t.day is null order by
+s.operator_code, s.line_name;
+```
+
+For rows representing matches there are 110 rows where the bounding box
+of the SIRI-VM journey doesn't overlap the bounding box of the matched
+timetable record at all. In all cases the SIRI-VM OperatorRef and
+LineName match the timetable OperatorCode and LineName (in meaning, if
+not exactly, see 'Misc Observations' below). This represents buses that
+that are believed to be undertaking one timetable journey while actually
+following some completely different path. It is entirely possible that
+there are further examples of this effect that are going unnoticed
+because the bounding boxes overlap even though the SIRI and timetable
+paths are still distinct.
+
 Joining on departure time and origin only
 -----------------------------------------
 
 Joining SIRI journeys on Timetable journeys by departure time and
-origin (but NOT and destination) gives 6331 rows
+origin (but NOT and destination) gives 6497 rows
 
-``` 
+```
 select count(*) from sirivm_journeys as s left join
 timetable_journeys as t on s.departure_time = t.departure_time and
-s.origin = t.origin; 
+s.origin = t.origin;
 ```
 
-of which 6122 (97%) matched a timetable entry and 209 (3%) didn't.
+of which 211 (7%) didn't match, 6017 (83%) represented SIRI-VM journeys
+matching a single Timetable journey, and 269 (0%) represent  SIRI-VM
+journeys matching multiple timetable journeys.
 
-``` 
-select count(*) from sirivm_journeys as s left join
-timetable_journeys as t on s.departure_time = t.departure_time and
-s.origin = t.origin where t.day is not null;
-
-select count(*) from sirivm_journeys as s left join timetable_journeys
-as t on s.departure_time = t.departure_time and s.origin = t.origin
-where t.day is null; 
+```
+select c, count(*) from (select count(distinct(t.serial)) as c from
+sirivm_journeys as s left join timetable_journeys as t on
+s.departure_time = t.departure_time and s.origin = t.origin group by
+s.serial) as s group by c
 ```
 
-6199 journeys of which 209 didn't match leaves 5990 that did. 6122
-matched rows for 5990 journeys means we got 132 extra records as a
-result of duplication (36 duplicates, 1 triple, 47 quad). These are the
-result of a combination of duplicated vehicle journeys and duplicated
-timetabled journeys (and in some cases their cross product).
+The following allow multiple matches to be investigated:
 
-``` 
+```
 select s.departure_time, s.origin, count(*) from sirivm_journeys as
 s left join timetable_journeys as t on s.departure_time =
 t.departure_time and s.origin = t.origin group by s.departure_time,
@@ -191,16 +199,8 @@ nd.atcocode order by t.departure_time, t.origin;
 
 Investigating those that didn't match:
 
-``` 
-select s.*, no.description, nd.description from sirivm_journeys as s
-left join timetable_journeys as t on s.departure_time = t.departure_time
-and s.origin = t.origin left join naptanplus as no on s.origin =
-no.atcocode left join naptanplus as nd on s.destination = nd.atcocode
-where t.day is null order by s.operator_code, s.line_name; 
-```
-
 We get all those above that didn't depend on details of the destination
-stop:
+stop, but nothing obviously new:
 
 * One journey on SCCM/X13 from Drummer St to Haverhill Bus Station
 15:50. Not in timetable, but there is a service departing 15:40.
@@ -208,6 +208,14 @@ stop:
 * 5 journeys on WP/75 between Orwell/Wrestlingworth and City
 Centre. All in timetable but with different City Centre stop
 (0500CCITY121 Drummer Street Bay 5 not 0500CCITY490 Emmanuel Street E4).
+
+```
+select s.*, no.description, nd.description from sirivm_journeys as s
+left join timetable_journeys as t on s.departure_time = t.departure_time
+and s.origin = t.origin left join naptanplus as no on s.origin =
+no.atcocode left join naptanplus as nd on s.destination = nd.atcocode
+where t.day is null order by s.operator_code, s.line_name;
+```
 
 Misc observations
 -----------------

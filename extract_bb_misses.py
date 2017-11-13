@@ -57,12 +57,15 @@ select
   t.file,                  --  7
   s.bbox,                  --  8
   t.bbox,                  --  9
-  t.stops,                 -- 10
-  no.description,          -- 11
-  nd.description,          -- 12
-  s.points,                -- 13
-  t.points,                -- 14
-  t.stops                  -- 15
+  no.description,          -- 10
+  nd.description,          -- 11
+  s.points,                -- 12
+  t.points,                -- 13
+  t.stops,                 -- 14
+  t.direction,             -- 15
+  s.vehicle_ref,           -- 16
+  t.journey_code,          -- 17
+  s.time                   -- 18
 from sirivm_journeys as s
 inner join timetable_journeys as t on
   s.departure_time = t.departure_time and
@@ -73,7 +76,7 @@ left join naptanplus as no on
 left join naptanplus as nd on
   t.destination = nd.atcocode
 where not s.bbox && t.bbox
-order by t.operator_code, t.line_name, t.departure_time;
+order by t.operator_code, t.line_name, t.direction, t.departure_time;
 '''
 
 query2 = '''
@@ -92,7 +95,7 @@ results = []
 for row in rows:
 
     stoplist = []
-    for stop in row[15]:
+    for stop in row[14]:
       cur.execute(query2, (stop,))
       r = cur.fetchone()
       if r:
@@ -101,12 +104,25 @@ for row in rows:
         stoplist.append(stop)
 
     item = {}
-    item['name'] = ' '.join((row[0],row[1],row[2],row[3],row[11],row[4],row[12]))
+    item['operator_code'] = row[0]
+    item['line_name'] = row[1]
+    item['departure_time'] = row[2]
+    item['origin_code'] = row[3]
+    item['destination_code'] = row[4]
+    item['journey_code'] = row[5]
+    item['region'] = row[6]
+    item['file'] = row[7]
     item['sbbox'] = row[8]
     item['tbbox'] = row[9]
-    item['spoints'] = row[13]
-    item['tpoints'] = row[14]
+    item['origin_description'] = row[10]
+    item['destination_description'] = row[11]
+    item['spoints'] = row[12]
+    item['tpoints'] = row[13]
     item['tstops'] = stoplist
+    item['direction'] = row[15]
+    item['vehicle_ref'] = row[16]
+    item['journey_code'] = row[17]
+    item['times'] = row[18]
     results.append(item)
 
 print('var items =')
